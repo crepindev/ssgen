@@ -46,7 +46,7 @@ class TestParentNode(unittest.TestCase):
     def test2_to_html(self):
         node2 = ParentNode(tag="p",
             children=[
-                ParentNode(tag="p",
+                ParentNode(tag="q",
                     children=[
                     LeafNode("b", "Bold text"),
                     LeafNode("b", "Bold text")
@@ -59,10 +59,10 @@ class TestParentNode(unittest.TestCase):
         )
         self.assertEqual(node2.to_html(), 
             "<p>"\
-                "<p>"\
+                "<q>"\
                     "<b>Bold text</b>"\
                     "<b>Bold text</b>"\
-                "</p>"\
+                "</q>"\
                 "Normal text"\
                 "<i>italic text</i>"\
                 "Normal text"\

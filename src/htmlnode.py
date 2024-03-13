@@ -44,14 +44,13 @@ class ParentNode(HTMLNode):
             raise ValueError("no children provided")
     
     def to_html(self):
-        parent_tag_open = f"<{self.tag}>"
-        parent_tag_close = f"</{self.tag}>"
         child_str = ""
         for child in self.children:
-            if child.children is None:
-                child_str += f"{child.to_html()}"             
+            if isinstance(child, LeafNode): #if LeafNode, return the html of that instance
+                child_str += f"{child.to_html()}"           
+            elif isinstance(child, ParentNode): #if ParentNode, go a level deeper then apply tags
+                child_str = child.to_html()
             else:
-                child.to_html()
-        print(f"DEBUG >>> {parent_tag_open}{child_str}{parent_tag_close}")
-        return f"{parent_tag_open}{child_str}{parent_tag_close}"
+                raise Exception("not sure what happened... neither ParentNode nor LeafNode detected")
+        return f"<{self.tag}>{child_str}</{self.tag}>"
     

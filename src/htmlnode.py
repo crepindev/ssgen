@@ -17,7 +17,15 @@ class HTMLNode:
                 key_value = self.props[key]
                 props_str += f' {key}="{key_value}"'
             return props_str
-        
+    
+    def __eq__ (self, tn):
+        if (self.tag == tn.tag and
+            self.value == tn.value and
+            self.children == tn.children and
+            self.props == tn.props):
+            return True
+        return False
+    
     def __repr__(self):
         return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
 
@@ -53,4 +61,5 @@ class ParentNode(HTMLNode):
             else:
                 raise Exception("not sure what happened... neither ParentNode nor LeafNode detected")
         return f"<{self.tag}>{child_str}</{self.tag}>"
+
     

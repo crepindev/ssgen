@@ -1,5 +1,6 @@
 from enum import Enum
 from htmlnode import LeafNode
+import re
 
 class TextType(Enum):
     text = "text"
@@ -28,7 +29,6 @@ class TextNode:
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
 
-
 def text_node_to_html_node(text_node):
     if text_node.text_type == TextType.text:
         return LeafNode(value=text_node.text)
@@ -46,6 +46,9 @@ def text_node_to_html_node(text_node):
         raise ValueError(f"unrecognised text type: {text_node.text_type}")  
     
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    # It takes a list of "old nodes", a delimiter, and a text type. 
+    # It should return a new list of nodes, where any "text" type nodes 
+    # in the input list are (potentially) split into multiple nodes based on the syntax.
     new_nodes = []
     if text_type not in TextType:
         raise Exception("invalid text type")
@@ -63,3 +66,17 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         else:
             new_nodes.append(old_node)
     return new_nodes
+
+def extract_markdown_images(text):
+    # Takes raw text and returns a list of tuples. 
+    # Each tuple should contain the alt text and the URL of any markdown images.
+    matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    return matches
+
+def extract_markdown_links(text):
+    # This one should extract markdown links instead of images. 
+    # It should return tuples of anchor text and URLs.
+    matches = re.findall(r"\[(.*?)\]\((.*?)\)", text)
+    return matches
+
+

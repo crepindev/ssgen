@@ -159,5 +159,26 @@ class TestTextNode(unittest.TestCase):
         for i in range(0,len(expected_result)):
             self.assertEqual(new_nodes[i], expected_result[i])
 
+    def test_text_to_textnodes(self):
+        example_input = "This is **text** with an *italic* word and a `code block` and "\
+            "an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
+        actual_result = text_to_textnodes(example_input)
+        expected_result = [
+            TextNode("This is ", TextType.text),
+            TextNode("text", TextType.bold),
+            TextNode(" with an ", TextType.text),
+            TextNode("italic", TextType.italic),
+            TextNode(" word and a ", TextType.text),
+            TextNode("code block", TextType.code),
+            TextNode(" and an ", TextType.text),
+            TextNode("image", TextType.image, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and a ", TextType.text),
+            TextNode("link", TextType.link, "https://boot.dev"),
+        ]
+        for i in range(0,len(expected_result)):
+            print(f"actual result = {actual_result[i]}")
+            self.assertEqual(actual_result[i], expected_result[i])
+        
+
 if __name__ == "__main__":
     unittest.main()

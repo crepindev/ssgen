@@ -86,14 +86,15 @@ def split_nodes_image(old_nodes):
         matches = extract_markdown_images(text)
         if len(matches) == 0:
             new_nodes.append(old_node)
-        for match in matches:
-            split_text = text.split(f"![{match[0]}]({match[1]})", 1)
-            new_node_text = TextNode(split_text[0], TextType.text)
-            new_node_image = TextNode(match[0], TextType.image, match[1])
-            new_nodes.extend([new_node_text, new_node_image])
-            text = split_text[1]
-        if len(text) > 0:
-            new_nodes.append(TextNode(text, TextType.text))
+        else:
+            for match in matches:
+                split_text = text.split(f"![{match[0]}]({match[1]})", 1)
+                new_node_text = TextNode(split_text[0], TextType.text)
+                new_node_image = TextNode(match[0], TextType.image, match[1])
+                new_nodes.extend([new_node_text, new_node_image])
+                text = split_text[1]
+            if len(text) > 0:
+                new_nodes.append(TextNode(text, TextType.text))
     return new_nodes
 
 def split_nodes_link(old_nodes):
@@ -103,12 +104,39 @@ def split_nodes_link(old_nodes):
         matches = extract_markdown_links(text)
         if len(matches) == 0:
             new_nodes.append(old_node)
-        for match in matches:
-            split_text = text.split(f"[{match[0]}]({match[1]})", 1)
-            new_node_text = TextNode(split_text[0], TextType.text)
-            new_node_image = TextNode(match[0], TextType.link, match[1])
-            new_nodes.extend([new_node_text, new_node_image])
-            text = split_text[1]
-        if len(text) > 0:
-            new_nodes.append(TextNode(text, TextType.text))
+        else: 
+            for match in matches:
+                split_text = text.split(f"[{match[0]}]({match[1]})", 1)
+                new_node_text = TextNode(split_text[0], TextType.text)
+                new_node_image = TextNode(match[0], TextType.link, match[1])
+                new_nodes.extend([new_node_text, new_node_image])
+                text = split_text[1]
+            if len(text) > 0:
+                new_nodes.append(TextNode(text, TextType.text))
     return new_nodes
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text,TextType.text)]
+    nodes = split_nodes_delimiter(nodes, "**", TextType.bold)
+    nodes = split_nodes_delimiter(nodes, "*", TextType.italic)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.code)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
+
+
+
+example_input = "This is **bold text** with an *italic* word and a `code block` and "\
+    "an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
+expected_result = [
+    TextNode("This is ", TextType.text),
+    TextNode("bold text", TextType.bold),
+    TextNode(" with an ", TextType.text),
+    TextNode("italic", TextType.italic),
+    TextNode(" word and a ", TextType.text),
+    TextNode("code block", TextType.code),
+    TextNode(" and an ", TextType.text),
+    TextNode("image", TextType.image, "https://i.imgur.com/zjjcJKZ.png"),
+    TextNode(" and a ", TextType.text),
+    TextNode("link", TextType.link, "https://boot.dev"),
+]

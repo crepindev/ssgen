@@ -87,6 +87,77 @@ class TestTextNode(unittest.TestCase):
         ]
         self.assertEqual(matches, expected_result)
 
+    def test_split_nodes_image(self):
+        #case1 - single node with multiple images
+        node = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and "\
+                "another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.text,
+        )
+        new_nodes = split_nodes_image([node])
+        expected_result = [
+            TextNode("This is text with an ", TextType.text),
+            TextNode("image", TextType.image, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.text),
+            TextNode("second image", TextType.image, "https://i.imgur.com/3elNhQu.png"),
+        ]
+        for i in range(0,len(expected_result)):
+            self.assertEqual(new_nodes[i], expected_result[i])
+
+        #case2 - multiple input nodes
+        node1 = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and "\
+                "another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.text,
+        )
+        node2 = TextNode("The REAL Jon Snow ![image](https://imgur.com/gallery/pFzbAtA)", TextType.text)
+        new_nodes = split_nodes_image([node1, node2])
+        expected_result = [
+            TextNode("This is text with an ", TextType.text),
+            TextNode("image", TextType.image, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.text),
+            TextNode("second image", TextType.image, "https://i.imgur.com/3elNhQu.png"),
+            TextNode("The REAL Jon Snow ", TextType.text),
+            TextNode("image", TextType.image, "https://imgur.com/gallery/pFzbAtA")
+        ]
+        for i in range(0,len(expected_result)):
+            self.assertEqual(new_nodes[i], expected_result[i])
+
+    def test_split_nodes_link(self):
+        #case1 - single node with multiple links
+        node = TextNode(
+            "This is text with a [link](https://i.imgur.com/zjjcJKZ.png) and "\
+                "another [second link](https://i.imgur.com/3elNhQu.png)",
+            TextType.text,
+        )
+        new_nodes = split_nodes_link([node])
+        expected_result = [
+            TextNode("This is text with a ", TextType.text),
+            TextNode("link", TextType.link, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.text),
+            TextNode("second link", TextType.link, "https://i.imgur.com/3elNhQu.png"),
+        ]
+        for i in range(0,len(expected_result)):
+            self.assertEqual(new_nodes[i], expected_result[i])
+
+        #case2 - multiple input nodes
+        node1 = TextNode(
+            "This is text with a [link](https://i.imgur.com/zjjcJKZ.png) and "\
+                "another [second link](https://i.imgur.com/3elNhQu.png)",
+            TextType.text,
+        )
+        node2 = TextNode("The REAL Jon Snow [is here](https://imgur.com/gallery/pFzbAtA)", TextType.text)
+        new_nodes = split_nodes_link([node1, node2])
+        expected_result = [
+            TextNode("This is text with a ", TextType.text),
+            TextNode("link", TextType.link, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.text),
+            TextNode("second link", TextType.link, "https://i.imgur.com/3elNhQu.png"),
+            TextNode("The REAL Jon Snow ", TextType.text),
+            TextNode("is here", TextType.link, "https://imgur.com/gallery/pFzbAtA")
+        ]
+        for i in range(0,len(expected_result)):
+            self.assertEqual(new_nodes[i], expected_result[i])
 
 if __name__ == "__main__":
     unittest.main()

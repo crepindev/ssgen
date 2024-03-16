@@ -178,6 +178,22 @@ class TestTextNode(unittest.TestCase):
         for i in range(0,len(expected_result)):
             print(f"actual result = {actual_result[i]}")
             self.assertEqual(actual_result[i], expected_result[i])
+    
+    def test_markdown_to_blocks(self):
+        example_input = "This is **bolded** paragraph\n" \
+            "\n" \
+            "This is another paragraph with *italic* text and `code` here\n" \
+            "This is the same paragraph on a new line\n" \
+            "\n" \
+            "* This is a list\n" \
+            "* with items\n"
+        actual_result = markdown_to_blocks(example_input)
+        expected_result = [
+            "This is **bolded** paragraph", 
+            "This is another paragraph with *italic* text and `code` here\n" \
+                "This is the same paragraph on a new line", 
+            "* This is a list\n* with items\n"]
+        self.assertEqual(actual_result, expected_result)
         
 
 if __name__ == "__main__":

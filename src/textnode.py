@@ -124,19 +124,9 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     return nodes
 
-
-
-example_input = "This is **bold text** with an *italic* word and a `code block` and "\
-    "an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
-expected_result = [
-    TextNode("This is ", TextType.text),
-    TextNode("bold text", TextType.bold),
-    TextNode(" with an ", TextType.text),
-    TextNode("italic", TextType.italic),
-    TextNode(" word and a ", TextType.text),
-    TextNode("code block", TextType.code),
-    TextNode(" and an ", TextType.text),
-    TextNode("image", TextType.image, "https://i.imgur.com/zjjcJKZ.png"),
-    TextNode(" and a ", TextType.text),
-    TextNode("link", TextType.link, "https://boot.dev"),
-]
+def markdown_to_blocks(markdown):
+    matches = set(re.findall("\n{2,}", markdown))
+    blocks = []
+    for match in matches:
+        blocks.extend(markdown.split(match))
+    return ([block.strip(" ") for block in blocks])

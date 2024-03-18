@@ -10,6 +10,14 @@ class TextType(Enum):
     link = "link"
     image = "image"
 
+class BlockType(Enum):
+    paragraph = "paragraph"
+    heading = "heading"
+    code = "code"
+    quote = "quote"
+    unordered_list = "unordered_list"
+    ordered_list = "ordered_list"
+
 class TextNode:
     def __init__(self, TEXT, TEXT_TYPE, URL=None):
         self.text = TEXT
@@ -130,3 +138,33 @@ def markdown_to_blocks(markdown):
     for match in matches:
         blocks.extend(markdown.split(match))
     return ([block.strip(" ") for block in blocks])
+
+def block_to_block_type(block):
+    block_start = block.split()[0]
+    block_end = block.split()[-1]
+    lines = block.split("\n")
+    len_lines = len(lines)
+    if re.findall(r"#{1,6}", block_start) != []:
+        return BlockType.heading
+    elif block_start == "```" and block_end == "```":
+        return BlockType.code
+    else:
+        outcome_counter = {"q": 0, "ul": 0, "ol": 0}
+        ol_counter = 1
+        for line in lines:
+            line_start = line.split("\n")[0]
+            if line_start[0] == ">":
+                outcome_counter["q"] += 1
+            elif line_start[0] in "*-"  :
+                outcome_counter["ul"] += 1
+            elif (re.findall(r"\d\.", line_start) != []) and (int(line_start[0]) == ol_counter):
+                outcome_counter["ol"] += 1
+                ol_counter += 1
+        if outcome_counter["q"] == len_lines:
+            return BlockType.quote
+        elif outcome_counter["ul"] == len_lines:
+            return BlockType.unordered_list
+        elif outcome_counter["ol"] == len_lines:
+            return BlockType.ordered_list
+        else:
+            return BlockType.paragraph

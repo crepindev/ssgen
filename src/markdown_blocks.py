@@ -126,7 +126,6 @@ def ulist_to_htmlnode(block):
     return ParentNode("ul", html_items)
 
 def quote_to_htmlnode(block):
-    items = block.split("\n")
     new_lines = []
     for line in lines:
         if not line.startwith(">"):

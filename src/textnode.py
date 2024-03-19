@@ -1,5 +1,5 @@
 from enum import Enum
-from htmlnode import LeafNode
+from htmlnode import *
 import re
 
 class TextType(Enum):
@@ -10,13 +10,6 @@ class TextType(Enum):
     link = "link"
     image = "image"
 
-class BlockType(Enum):
-    paragraph = "paragraph"
-    heading = "heading"
-    code = "code"
-    quote = "quote"
-    unordered_list = "unordered_list"
-    ordered_list = "ordered_list"
 
 class TextNode:
     def __init__(self, TEXT, TEXT_TYPE, URL=None):
@@ -37,134 +30,19 @@ class TextNode:
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
 
-def text_node_to_html_node(text_node):
-    if text_node.text_type == TextType.text:
-        return LeafNode(value=text_node.text)
-    elif text_node.text_type == TextType.bold:
-        return LeafNode(tag="b", value=text_node.text)
-    elif text_node.text_type == TextType.italic:
-        return LeafNode(tag="i", value=text_node.text)
-    elif text_node.text_type == TextType.code:
-        return LeafNode(tag="code", value=text_node.text)
-    elif text_node.text_type == TextType.link:
-        return LeafNode(tag="a", value=text_node.text, prop={"href": text_node.url})
-    elif text_node.text_type == TextType.image:
-        return LeafNode(tag="img", prop={"href": text_node.url, "alt": text_node.text})
+def textnode_to_htmlnode(textnode):
+    if textnode.text_type == TextType.text:
+        return LeafNode(value=textnode.text)
+    elif textnode.text_type == TextType.bold:
+        return LeafNode(tag="b", value=textnode.text)
+    elif textnode.text_type == TextType.italic:
+        return LeafNode(tag="i", value=textnode.text)
+    elif textnode.text_type == TextType.code:
+        return LeafNode(tag="code", value=textnode.text)
+    elif textnode.text_type == TextType.link:
+        return LeafNode(tag="a", value=textnode.text, prop={"href": textnode.url})
+    elif textnode.text_type == TextType.image:
+        return LeafNode(tag="img", prop={"href": textnode.url, "alt": textnode.text})
     else:
-        raise ValueError(f"unrecognised text type: {text_node.text_type}")  
-    
-def split_nodes_delimiter(old_nodes, delimiter, text_type):
-    # It takes a list of "old nodes", a delimiter, and a text type. 
-    # It should return a new list of nodes, where any "text" type nodes 
-    # in the input list are (potentially) split into multiple nodes based on the syntax.
-    new_nodes = []
-    if text_type not in TextType:
-        raise Exception("invalid text type")
-    for old_node in old_nodes:
-        if isinstance(old_node, TextNode) and old_node.text_type == TextType.text:
-            old_node_text = old_node.text
-            if old_node_text.count(delimiter) % 2 == 1:
-                raise Exception("invalid Markdown syntax, matching delimiter missing")
-            text_list = old_node_text.split(sep=delimiter)
-            for i in range(0,len(text_list)):
-                if i % 2 == 0:
-                    new_nodes.append(TextNode(text_list[i], TextType.text))
-                else:
-                    new_nodes.append(TextNode(text_list[i], text_type))
-        else:
-            new_nodes.append(old_node)
-    return new_nodes
+        raise ValueError(f"unrecognised text type: {textnode.text_type}")  
 
-def extract_markdown_images(text):
-    # Takes raw text and returns a list of tuples. 
-    # Each tuple should contain the alt text and the URL of any markdown images.
-    matches = re.findall(r"!\[(.*?)\]\((.*?)\)", text)
-    return matches
-
-def extract_markdown_links(text):
-    # This one should extract markdown links instead of images. 
-    # It should return tuples of anchor text and URLs.
-    matches = re.findall(r"\[(.*?)\]\((.*?)\)", text)
-    return matches
-
-def split_nodes_image(old_nodes):
-    new_nodes = []
-    for old_node in old_nodes:
-        text = old_node.text
-        matches = extract_markdown_images(text)
-        if len(matches) == 0:
-            new_nodes.append(old_node)
-        else:
-            for match in matches:
-                split_text = text.split(f"![{match[0]}]({match[1]})", 1)
-                new_node_text = TextNode(split_text[0], TextType.text)
-                new_node_image = TextNode(match[0], TextType.image, match[1])
-                new_nodes.extend([new_node_text, new_node_image])
-                text = split_text[1]
-            if len(text) > 0:
-                new_nodes.append(TextNode(text, TextType.text))
-    return new_nodes
-
-def split_nodes_link(old_nodes):
-    new_nodes = []
-    for old_node in old_nodes:
-        text = old_node.text
-        matches = extract_markdown_links(text)
-        if len(matches) == 0:
-            new_nodes.append(old_node)
-        else: 
-            for match in matches:
-                split_text = text.split(f"[{match[0]}]({match[1]})", 1)
-                new_node_text = TextNode(split_text[0], TextType.text)
-                new_node_image = TextNode(match[0], TextType.link, match[1])
-                new_nodes.extend([new_node_text, new_node_image])
-                text = split_text[1]
-            if len(text) > 0:
-                new_nodes.append(TextNode(text, TextType.text))
-    return new_nodes
-
-def text_to_textnodes(text):
-    nodes = [TextNode(text,TextType.text)]
-    nodes = split_nodes_delimiter(nodes, "**", TextType.bold)
-    nodes = split_nodes_delimiter(nodes, "*", TextType.italic)
-    nodes = split_nodes_delimiter(nodes, "`", TextType.code)
-    nodes = split_nodes_image(nodes)
-    nodes = split_nodes_link(nodes)
-    return nodes
-
-def markdown_to_blocks(markdown):
-    matches = set(re.findall("\n{2,}", markdown))
-    blocks = []
-    for match in matches:
-        blocks.extend(markdown.split(match))
-    return ([block.strip(" ") for block in blocks])
-
-def block_to_block_type(block):
-    block_start = block.split()[0]
-    block_end = block.split()[-1]
-    lines = block.split("\n")
-    len_lines = len(lines)
-    if re.findall(r"#{1,6}", block_start) != []:
-        return BlockType.heading
-    elif block_start == "```" and block_end == "```":
-        return BlockType.code
-    else:
-        outcome_counter = {"q": 0, "ul": 0, "ol": 0}
-        ol_counter = 1
-        for line in lines:
-            line_start = line.split("\n")[0]
-            if line_start[0] == ">":
-                outcome_counter["q"] += 1
-            elif line_start[0] in "*-"  :
-                outcome_counter["ul"] += 1
-            elif (re.findall(r"\d\.", line_start) != []) and (int(line_start[0]) == ol_counter):
-                outcome_counter["ol"] += 1
-                ol_counter += 1
-        if outcome_counter["q"] == len_lines:
-            return BlockType.quote
-        elif outcome_counter["ul"] == len_lines:
-            return BlockType.unordered_list
-        elif outcome_counter["ol"] == len_lines:
-            return BlockType.ordered_list
-        else:
-            return BlockType.paragraph

@@ -16,9 +16,10 @@ class BlockType(Enum):
 def markdown_to_blocks(markdown):
     matches = set(re.findall("\n{2,}", markdown))
     blocks = []
-    for match in matches:
-        blocks.extend(markdown.split(match))
-    return ([block.strip(" ") for block in blocks])
+    for match in set(matches):
+        blocks.extend(list(filter(None,markdown.split(match))))
+    output = [block.strip(" ") for block in blocks]
+    return output
 
 def markdown_to_htmlnode(markdown):
     #top level function that converts a full markdown document into a HTML node
@@ -60,6 +61,7 @@ def block_to_blocktype(block):
         outcome_counter = {"q": 0, "ul": 0, "ol": 0}
         ol_counter = 1
         for line in lines:
+            line = line.strip()
             line_start = line.split("\n")[0]
             if line_start[0] == ">":
                 outcome_counter["q"] += 1
@@ -85,8 +87,6 @@ def text_to_children(text):
         children.append(htmlnode)
     return children
 
-# review below this line against solution
-
 def paragraph_to_htmlnode(block):
     lines = block.split("\n")
     paragraph = " ".join(lines)
@@ -94,9 +94,9 @@ def paragraph_to_htmlnode(block):
     return ParentNode("p", children)
 
 def heading_to_htmlnode(block):
-    header = block.strip("\n")[0]
-    header_level = len(re.findall("#{1,6}",header)[0])
-    children = text_to_children(block)
+    header = block.split("\n")[0]
+    header_level = header.count("#")
+    children = text_to_children(block[header_level:].strip())
     return ParentNode(f"h{header_level}", children)
 
 def code_to_htmlnode(block):
@@ -126,9 +126,10 @@ def ulist_to_htmlnode(block):
     return ParentNode("ul", html_items)
 
 def quote_to_htmlnode(block):
+    lines = block.split("\n")
     new_lines = []
     for line in lines:
-        if not line.startwith(">"):
+        if not line.startswith(">"):
             raise ValueError("Invalid quote block")
         new_lines.append(line.lstrip(">").strip())
     content = " ".join(new_lines)

@@ -40,9 +40,9 @@ def textnode_to_htmlnode(textnode):
     elif textnode.text_type == TextType.code:
         return LeafNode(tag="code", value=textnode.text)
     elif textnode.text_type == TextType.link:
-        return LeafNode(tag="a", value=textnode.text, prop={"href": textnode.url})
+        return LeafNode(tag="a", value=textnode.text, props={"href": textnode.url})
     elif textnode.text_type == TextType.image:
-        return LeafNode(tag="img", prop={"href": textnode.url, "alt": textnode.text})
+        return LeafNode(tag="img", props={"href": textnode.url, "alt": textnode.text})
     else:
         raise ValueError(f"unrecognised text type: {textnode.text_type}")  
 

@@ -1,8 +1,8 @@
-from textnode import TextNode
 import os
 import shutil
 
 def copy_static(from_dir, to_dir):
+    # copy_static("./static", "./public"))
     if not os.path.exists(from_dir):
         raise ValueError(f"the provided path does not exist")
     if not os.path.exists(to_dir):
@@ -23,15 +23,3 @@ def copy_static(from_dir, to_dir):
         else:
             logged_paths.extend(copy_static(path, to_dir))   
     return logged_paths
-
-print(copy_static("./static", "./public"))
-
-def main():
-    TEXT = "Hello there"
-    TEXT_TYPE = "italics"
-    URL = "www.google.com"
-    newTextNode = TextNode(TEXT, TEXT_TYPE, URL)
-    print(newTextNode)
-    pass
-
-# main()

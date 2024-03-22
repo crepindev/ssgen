@@ -62,10 +62,12 @@ def block_to_blocktype(block):
         ol_counter = 1
         for line in lines:
             line = line.strip()
+            if line == "":
+                continue
             line_start = line.split("\n")[0]
-            if line_start[0] == ">":
+            if line_start.startswith(">"):
                 outcome_counter["q"] += 1
-            elif line_start[0] in "*-"  :
+            elif line_start[0] in "*-":
                 outcome_counter["ul"] += 1
             elif (re.findall(r"\d\.", line_start) != []) and (int(line_start[0]) == ol_counter):
                 outcome_counter["ol"] += 1
